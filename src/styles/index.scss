@@ -1,7 +1,7 @@
 // styles/index.scss 
  @import './variables.scss'; 
 
- // globals 
+ // globals
  html { 
  font-family: $font-family; 
  -webkit-text-size-adjust: 100%; 
@@ -12,8 +12,8 @@
  } 
 
  body { 
- margin: 0; 
- background-color: $body-bg; 
+ margin: 0;
+ background-color: $body-bg;
  } 
 
  // custom element theme 更改 element 主题⾊ 
