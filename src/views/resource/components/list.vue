@@ -3,15 +3,30 @@
     <el-card>
       <div slot="header" class="clearfix">
         <!-- 使用 form 组件：行内表单 -->
-        <el-form :inline="true" :model="form" class="demo-form-inline">
-          <el-form-item label="资源名称">
-            <el-input v-model="form.name" placeholder="资源名称"></el-input>
+        <el-form
+          :inline="true"
+          :model="form" class="demo-form-inline"
+          ref="form"
+        >
+          <el-form-item label="资源名称" prop="name">
+            <el-input
+              v-model="form.name"
+              placeholder="资源名称"
+              clearable
+            ></el-input>
           </el-form-item>
-          <el-form-item label="资源路径">
-            <el-input v-model="form.url" placeholder="资源路径"></el-input>
+          <el-form-item label="资源路径" prop="url">
+            <el-input
+              v-model="form.url"
+              placeholder="资源路径"
+              clearable
+            ></el-input>
           </el-form-item>
-          <el-form-item label="资源分类">
-            <el-select v-model="form.categoryId" placeholder="资源分类">
+          <el-form-item label="资源分类" prop="categoryId">
+            <el-select
+              v-model="form.categoryId" placeholder="资源分类"
+              clearable
+            >
               <!-- 请求接口进行下拉菜单项设置 -->
               <el-option
                 v-for="item in resourceCategories"
@@ -23,56 +38,63 @@
           </el-form-item>
           <el-form-item>
             <el-button
+              @click="onReset"
+            >重置
+            </el-button>
+            <el-button
              type="primary"
              @click="onSubmit"
+             :disabled="isLoading"
             >查询</el-button>
           </el-form-item>
         </el-form>
       </div>
       <!-- 使用 Table 组件 -->
       <el-table
-          :data="resources"
-          style="width: 100%">
-          <el-table-column
-            type="index"
-            label="编号"
-            width="100"
+        :data="resources"
+        style="width: 100%"
+        v-loading="isLoading"
+      >
+        <el-table-column
+          type="index"
+          label="编号"
+          width="100"
+        >
+        </el-table-column>
+        <el-table-column
+          prop="name"
+          label="资源名称"
+        >
+        </el-table-column>
+        <el-table-column
+          prop="url"
+          label="资源路径"
           >
-          </el-table-column>
-          <el-table-column
-            prop="name"
-            label="资源名称"
-          >
-          </el-table-column>
-          <el-table-column
-            prop="url"
-            label="资源路径"
-            >
-          </el-table-column>
-          <el-table-column
-            prop="description"
-            label="描述">
-          </el-table-column>
-          <!-- 设置过滤器需要使用作用域插槽获取数据 -->
-          <el-table-column
-            label="添加时间">
-            <template slot-scope="scope">
-              <span>{{ scope.row.createdTime | dateFormat }}</span>
-            </template>
-          </el-table-column>
-          <el-table-column label="操作">
-            <template slot-scope="scope">
-              <el-button
-                size="mini"
-                @click="handleEdit(scope.row)"
-              >编辑</el-button>
-              <el-button
-                size="mini"
-                @click="handleDelete(scope.row)"
-                type="danger"
-              >删除</el-button>
-            </template>
-          </el-table-column>
+        </el-table-column>
+        <el-table-column
+          prop="description"
+          label="描述">
+        </el-table-column>
+        <!-- 设置过滤器需要使用作用域插槽获取数据 -->
+        <el-table-column
+          label="添加时间">
+          <template slot-scope="scope">
+            <span>{{ scope.row.createdTime | dateFormat }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作">
+          <template slot-scope="scope">
+            <el-button
+              size="mini"
+              @click="handleEdit(scope.row)"
+            >编辑</el-button>
+            <el-button
+              size="mini"
+              @click="handleDelete(scope.row)"
+              type="danger"
+            >删除</el-button>
+          </template>
+        </el-table-column>
       </el-table>
       <!-- 分页组件结构 -->
       <el-pagination
@@ -82,7 +104,9 @@
         :page-sizes="[10, 20, 30]"
         :page-size="form.size"
         layout="total, sizes, prev, pager, next, jumper"
-        :total="totalCount">
+        :total="totalCount"
+        :disabled="isLoading"
+      >
       </el-pagination>
     </el-card>
   </div>
@@ -112,7 +136,9 @@ export default {
       // 数据总数
       totalCount: 0,
       // 存储资源分类信息
-      resourceCategories: []
+      resourceCategories: [],
+      // 用于保存加载状态
+      isLoading: false
     }
   },
   created () {
@@ -122,6 +148,10 @@ export default {
     this.getResourceCategories()
   },
   methods: {
+    // 重置按钮点击操作
+    onReset () {
+      this.$refs.form.resetFields()
+    },
     // 提交筛选功能
     onSubmit () {
       // 请求数据前，将请求的页数更新为 1
@@ -136,10 +166,14 @@ export default {
       }
     },
     async loadResources () {
+      // 开始加载数据
+      this.isLoading = true
       const { data } = await getResourcePages(this.form)
       if (data.code === '000000') {
         this.resources = data.data.records
         this.totalCount = data.data.total
+        // 取消加载状态
+        this.isLoading = false
       }
     },
     // 每页显示条数变化时触发
