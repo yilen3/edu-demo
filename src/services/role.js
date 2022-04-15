@@ -16,3 +16,20 @@ export const deleteRole = id => {
     url: `/boss/role/${id}`
   })
 }
+
+// 保存或更新角色
+export const createorUpdate = data => {
+  return request({
+    method: 'POST',
+    url: '/boss/role/saveOrUpdate',
+    data
+  })
+}
+
+// 获取角色
+export const getRoleById = id => {
+  return request({
+    method: 'GET',
+    url: `boss/role/${id}`
+  })
+}

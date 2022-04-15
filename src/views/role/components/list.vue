@@ -17,7 +17,7 @@
         </el-form>
       </div>
       <!-- 显示对话框 -->
-      <el-button>添加角色</el-button>
+      <el-button @click="handleAdd">添加角色</el-button>
       <el-table
         :data="roles"
         style="width: 100%"
@@ -36,9 +36,11 @@
           label="描述"
         />
         <el-table-column
-          prop="createdTime"
-          label="添加时间"
-        />
+          prop="createdTime">
+          <template slot-scope="scope">
+            <span>{{ scope.row.createdTime | dateFormat }}</span>
+          </template>
+        </el-table-column>>
         <el-table-column
           label="操作"
           align="center"
@@ -48,6 +50,12 @@
             <div>
               <el-button
                 type="text"
+                @click="$router.push({
+                  name: 'alloc-menu',
+                  params: {
+                    roleId: scope.row.id
+                  }
+                })"
               >分配菜单</el-button>
               <el-button
                 type="text"
@@ -67,32 +75,74 @@
         </el-table-column>
       </el-table>
       <!-- 添加角色的对话框结构 -->
+      <el-dialog
+        :title="isEdit ? '编辑角色' : '添加角色'"
+        :visible.sync="dialogVisible"
+        width="30%"
+      >
+        <!-- 将添加与编辑功能单独封装到组件中 -->
+        <create-or-edit
+          :isEdit="isEdit"
+          :role-id="roleId"
+          @success="handleSuccess"
+          @cancel="handleCancel"
+        ></create-or-edit>
+      </el-dialog>
     </el-card>
   </div>
 </template>
 
 <script>
 import { getRoles, deleteRole } from '@/services/role'
+import CreateOrEdit from './CreateOrEdit'
 export default {
   name: 'RoleList',
+  components: {
+    CreateOrEdit
+  },
   data () {
     return {
       form: {
         name: ''
       },
       isLoading: false,
-      roles: []
+      roles: [],
+      // 控制对话框显示
+      dialogVisible: false,
+      // 控制新增对话框的功能状态
+      isEdit: false,
+      // 存储正在编辑的角色id
+      roleId: ''
     }
   },
   created () {
     this.loadRoles()
   },
   methods: {
+    // 点击添加按钮触发
+    handleAdd () {
+      this.dialogVisible = true
+      this.isEdit = false
+    },
+    // 监听子组件取消状态
+    handleCancel () {
+      this.dialogVisible = false
+    },
+    // 监听子组件的添加状态，成功时触发
+    handleSuccess () {
+      // 隐藏对话框
+      this.dialogVisible = false
+      // 刷新列表
+      this.loadRoles()
+    },
     onReset () {
     },
     onSubmit () {
     },
-    handleEdit () {
+    handleEdit (role) {
+      this.dialogVisible = true
+      this.isEdit = true
+      this.roleId = role.id
     },
     // 删除角色
     handleDelete (role) {
@@ -116,6 +166,16 @@ export default {
       const { data } = await getRoles(this.form)
       this.roles = data.data.records
       this.isLoading = false
+    }
+  },
+  filters: {
+    // 日期过滤器
+    dateFormat (date) {
+      date = new Date(date)
+      return `
+        ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}
+        ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}
+      `
     }
   }
 }
