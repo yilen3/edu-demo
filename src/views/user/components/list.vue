@@ -58,7 +58,7 @@
         label="用户名">
       </el-table-column>
       <el-table-column
-        prop="phobe"
+        prop="phone"
         label="手机号">
       </el-table-column>
       <el-table-column
