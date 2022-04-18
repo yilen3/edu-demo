@@ -1,7 +1,17 @@
 <template>
   <div class="course-image">
     <el-form-item  :label="label">
+      <!-- progress 组件 -->
+      <el-progress
+        v-if="isUploading"
+        type="circle"
+        :width="178"
+        :percentage="percentage"
+        :status="percentage === 100 ? 'success' : undefined"
+      ></el-progress>
+      <!-- upload 组件 -->
       <el-upload
+        v-else
         class="avatar-uploader"
         action="https://jsonplaceholder.typicode.com/posts/"
         :show-file-list="false"
@@ -34,19 +44,33 @@ export default {
       default: 2
     }
   },
+  data () {
+    return {
+      // 用于保存上传状态
+      isUploading: false,
+      // 用于保存上传进度百分比
+      percentage: 0
+    }
+  },
   methods: {
     // 图片上传处理函数
     // option 为上传文件的相关信息
     // option.file 为要上传的文件信息
     async handleUpload (option) {
+      this.isUploading = true
       // 使用 FormDate 对象处理
       const fd = new FormData()
       fd.append('file', option.file)
       // 发送上传请求
-      const { data } = await uploadCourseImage(fd)
+      const { data } = await uploadCourseImage(fd, event => {
+        this.percentage = Math.floor((event.loaded / event.total) * 100)
+      })
       if (data.code === '000000') {
         // data.data.name 是服务端响应的，图片上传成功后的线上地址
         this.$emit('input', data.data.name)
+        this.isUploading = false
+        // 上传成功后，设置进度信息归零，避免下次上传出现回退效果
+        this.percentage = 0
       }
     },
     // 上传图片成功回调

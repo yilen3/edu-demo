@@ -28,11 +28,24 @@ export const saveOrUpdateCourse = data => {
 }
 
 // 上传图片接口
-export const uploadCourseImage = data => {
+export const uploadCourseImage = (data, onUploadProgress) => {
   // data 应当为 FormData 对象
   return request({
     method: 'POST',
     url: '/boss/course/upload',
-    data
+    data,
+    // onUploadProgress 用于监测上传进度
+    onUploadProgress
+  })
+}
+
+// 根据课程 ID 获取课程信息
+export const getCourseById = courseId => {
+  return request({
+    method: 'GET',
+    url: '/boss/course/getCourseById',
+    params: {
+      courseId
+    }
   })
 }
