@@ -90,6 +90,20 @@ const routes = [
         name: 'course-edit',
         component: () => import(/* webpackChunkName: 'course-edit' */'@/views/course/edit'),
         props: true
+      },
+      // 课程内容组件
+      {
+        path: '/course/:courseId/section',
+        name: 'course-section',
+        component: () => import(/* webpackChunkName: 'course-section' */'@/views/course/section'),
+        props: true
+      },
+      // 上传课时视频
+      {
+        path: '/course/:courseId/video',
+        name: 'course-video',
+        component: () => import(/* webpackChunkName: 'course-video' */'@/views/course/video'),
+        props: true
       }
     ]
   },
